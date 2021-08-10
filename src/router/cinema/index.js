@@ -13,6 +13,10 @@ export default {
         {
             path: 'feature',
             component: () => import('@/components/Feature')
+        },
+        {
+            path: '/cinema',
+            redirect: '/cinema/ciList'
         }
     ]
 }

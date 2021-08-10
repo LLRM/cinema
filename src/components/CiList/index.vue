@@ -3,7 +3,7 @@
 		<!-- <ul  class="msgHtmlBox" v-html='movieList'></ul> -->
 		<!-- <Loading v-if="isLoading" /> -->
 		<ul>
-			<!-- <li v-for="item in cinemaList" :key="item.id">
+			<li v-for="item in cinemaList" :key="item.id">
 				<div>
 					<span>{{item.nm}}</span>
 					<span class="q" v-if="item.sellPrice"><span class="price">{{item.sellPrice}}</span> 元起</span>
@@ -14,12 +14,9 @@
 				</div>
 				<div class="card">
 					<div v-for="(num, key) in item.tag" :key="key" v-if="num===1" :class="key | formatClass">{{ key | formatCard}}</div>
-					<div class="allowRefund bl">退</div>
-                  	<div class="endorse bl">改签</div>
-                  	<div class="snack">小吃</div>
 				</div>
-			</li> -->
-			<li>
+			</li>
+			<!-- <li>
 				<div>
 					<span>深影国际嘉之华中心影城</span>
 					<span class="q"><span class="price">39</span> 元起</span>
@@ -110,7 +107,7 @@
 				<div class="card">
 					<div class="hallType bl">IMAX厅</div>
 				</div>
-			</li>
+			</li> -->
 		</ul>
 	</div>
 </template>
@@ -125,19 +122,19 @@ export default {
             prevCityId: -1
         }
 	},
-	activated(){
+	mounted(){
         //没有再次切换城市
-        var cityId = this.$store.state.city.id;
-        if(this.prevCityId === cityId){ return };
+        // var cityId = this.$store.state.city.id;
+        // if(this.prevCityId === cityId){ return };
 
         this.isLoading = true;
         console.log('执行')
-        this.axios.get('/ajax/cinemaList?cityId=' + cityId).then((res)=>{
-            console.log(res)
+        this.axios.get('/ajax/cinemaList?cityId=30').then((res)=>{
+            console.log('res',res)
             if(res.statusText === "OK"){
                 this.cinemaList = res.data.cinemas;
-                this.prevCityId = cityId;
-                this.isLoading = false;
+                // this.prevCityId = cityId;
+                // this.isLoading = false;
             }
         })
     },

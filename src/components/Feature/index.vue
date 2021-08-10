@@ -1,7 +1,7 @@
 <template>
     <div class="cinema_body">
-		<Loading v-if="isLoading" />
-		<ul v-else>
+		<!-- <Loading v-if="isLoading" /> -->
+		<ul>
 			<!-- <li v-if="isEmpty" class="empty">暂无影院</li> -->
 			<li v-for="item in featureList" :key="item.id">
 				<div>
@@ -14,13 +14,11 @@
 				</div>
 				<div class="card">
 					<div v-for="(num, key) in item.tag" :key="key" v-if="num===1" :class="key | formatClass">{{ key | formatCard}}	
-				</div>
-					<!-- <div class="allowRefund bl">退</div>
-                  	<div class="endorse bl">改签</div>
-                  	<div class="snack">小吃</div> -->
+					</div>
+					<div v-for="items in item.tag.hallType" :key="items" class="bl">{{ items }}</div>
 				</div>
 			</li>
-			<li>
+			<!-- <li>
 				<div>
 					<span>橙天嘉禾影城（深圳卓悦汇IMAX店）</span>
 					<span class="q"><span class="price">39</span> 元起</span>
@@ -124,7 +122,7 @@
 					<div class="hallType bl">RealD厅</div>
 					<div class="hallType bl">RealD 6FL厅</div>
 				</div>
-			</li>
+			</li> -->
 		</ul>
 	</div>
     
@@ -143,21 +141,21 @@ export default {
 	},
 	activated(){
         //没有再次切换城市
-        var cityId = this.$store.state.city.id;
-        if(this.prevCityId === cityId){ return };
+        // var cityId = this.$store.state.city.id;
+        // if(this.prevCityId === cityId){ return };
 
         this.isLoading = true;
-        this.axios.get('/ajax/cinemaList?cityId=' + cityId + '&service/subItemsId=3').then((res)=>{
+        this.axios.get('/ajax/cinemaList?cityId=30&hallType=3').then((res)=>{
             console.log(res)
             if(res.statusText === "OK"){
                 this.featureList = res.data.cinemas;
-                this.prevCityId = cityId;
-				this.isLoading = false;
-				this.isEmpty = false;
+                // this.prevCityId = cityId;
+				// this.isLoading = false;
+				// this.isEmpty = false;
 			}
-			if(this.featureList == ''){
-				this.isEmpty = true;
-			}
+			// if(this.featureList == ''){
+			// 	this.isEmpty = true;
+			// }
         })
     },
 	filters: {
