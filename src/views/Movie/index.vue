@@ -4,7 +4,7 @@
         <div id="content">
             <div class="movie_menu">
                 <router-link tag="div" to="/movie/city" class="city_name">
-                    <span>大连</span><i class="iconfont icon-lower-triangle"></i>
+                    <span>{{$store.state.city.nm}}</span><i class="iconfont icon-lower-triangle"></i>
                 </router-link>
                 <div class="hot_switch">
                     <router-link tag="div" to="/movie/nowPlaying" class="hot_item">正在热映</router-link>
@@ -19,6 +19,7 @@
             </keep-alive>
         </div>
         <TabBar/>
+        <router-view name="detail" />
     </div>
 </template>
 <script>
@@ -47,6 +48,7 @@ export default {
 .movie_menu .city_name{
     margin-left: 20px;
     height: 100%;
+    box-sizing: border-box;
 }
 .movie_menu .city_name.active{
     color: #ef4238;
@@ -68,6 +70,7 @@ export default {
 .movie_menu .search_entry{
     margin-right: 20px;
     height: 100%;
+    box-sizing: border-box;
 }
 .movie_menu .search_entry i{
     font-size: 24px;

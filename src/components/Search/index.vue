@@ -60,10 +60,11 @@ export default {
     watch: {
         message(newVal){
             var that = this;
+            var cityId = this.$store.state.city.id;
             // 取消上一次请求
             this.cancelRequest();
             
-            this.axios.get('/ajax/search?cityId=30&kw=' + newVal, {
+            this.axios.get('/ajax/search?cityId=' + cityId + '&kw=' + newVal, {
                 //在请求中配置cancelToken这个属性，是为了使得请求具有可以取消的功能；
                 //cancelToken属性的值是一个CancelToken实例对象，在它的executor函数中提取出cancel函数，执行这个cancel函数来取消请求。
                 cancelToken: new this.axios.CancelToken(function executor(c) {
