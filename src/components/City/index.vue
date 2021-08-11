@@ -1,33 +1,38 @@
 <template>
     <div class="city_body">
         <div class="city_list">
-            <div class="city_hot">
-                <h2>热门城市</h2>
-                <ul class="clearfix">
-                    <li v-for="item in hotList" :key="item.id">{{item.nm}}</li>
-                    <!-- 示例 -->
-                    <!-- <li>北京</li> -->
-                </ul>
-            </div>
-            <div class="city_sort" ref="city_sort">
+            <Loading v-if="isLoading" />
+            <Scroller v-else ref="scroller">
                 <div>
-                    <li v-for="item in cityList" :key="item.index">
-                        <h2>{{item.index}}</h2>
-                        <ul>
-                            <li v-for="itemList in item.list" :key="itemList.id">
-                                {{itemList.nm}}
-                            </li>
+                    <div class="city_hot">
+                        <h2>热门城市</h2>
+                        <ul class="clearfix">
+                            <li v-for="item in hotList" :key="item.id" @tap="handleToCity(item.nm, item.id)">{{item.nm}}</li>
+                            <!-- 示例 -->
+                            <!-- <li>北京</li> -->
                         </ul>
-                        <!-- 示例 -->
-                        <!-- 
-                        <h2>A</h2>
-                        <ul>
-                            <li>阿拉善盟</li>
-                            <li>阿拉善盟</li>
-                        </ul> -->
-                    </li>
+                    </div>
+                    <div class="city_sort" ref="city_sort">
+                        <div>
+                            <li v-for="item in cityList" :key="item.index">
+                                <h2>{{item.index}}</h2>
+                                <ul>
+                                    <li v-for="itemList in item.list" :key="itemList.id"  @tap="handleToCity(itemList.nm, itemList.id)">
+                                        {{itemList.nm}}
+                                    </li>
+                                </ul>
+                                <!-- 示例 -->
+                                <!-- 
+                                <h2>A</h2>
+                                <ul>
+                                    <li>阿拉善盟</li>
+                                    <li>阿拉善盟</li>
+                                </ul> -->
+                            </li>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </Scroller>
         </div>
      
         <div class="city_index">
@@ -48,25 +53,40 @@ export default {
     data(){
         return{
             cityList: [],
-            hotList: []
+            hotList: [],
+            isLoading: true
         }
     },
     mounted(){
-        this.axios.get('/dianying/cities.json').then((res) => {
-            if(res.statusText === "OK"){
-                var cities = res.data.cts;
-                //console.log(cities);
-                // [{index:'A',list:[{nm : '安徽' , id : 123}]}]
-                var cityList = this.formatCityList(cities);
-                this.cityList = cityList;
-                this.hotList = cities.slice(0,11);
+        //获取本地存储
+        var cityList = window.localStorage.getItem('cityList'),
+            hotList = window.localStorage.getItem('hotList');
+        if(cityList && hotList){
+            this.cityList = JSON.parse(cityList);
+            this.hotList = JSON.parse(hotList);
+            this.isLoading = false;
+        }else{
+            this.axios.get('/dianying/cities.json').then((res) => {
+                if(res.statusText === "OK"){
+                    var cities = res.data.cts;
+                    //console.log(cities);
+                    // [{index:'A',list:[{nm : '安徽' , id : 123}]}]
+                    var cityList = this.formatCityList(cities);
+                    this.cityList = cityList;
+                    this.hotList = cities.slice(0,11);
 
-                // this.isLoading = false;
-                // //设置本地存储
-                // window.localStorage.setItem('hotList', JSON.stringify(this.hotList));
-                // window.localStorage.setItem('cityList', JSON.stringify(cityList));
-            }
-        })
+                    this.isLoading = false;
+                    //设置本地存储
+                    window.localStorage.setItem('hotList', JSON.stringify(this.hotList));
+                    window.localStorage.setItem('cityList', JSON.stringify(cityList));
+                    
+                    // 重新渲染better-scroll
+                    this.$nextTick(() => {
+                        this.$refs.scroller.refreshBScroll();
+                    })
+                }
+            })
+        }    
     },
     methods: {
         formatCityList(cities){
@@ -110,9 +130,18 @@ export default {
             }
             return cityList
         },
+        // 跳转城市开头字母
         handleToIndex(index){
             var h2 = this.$refs.city_sort.getElementsByTagName('h2');
-            this.$refs.city_sort.parentNode.scrollTop = h2[index].offsetTop;
+            // this.$refs.city_sort.parentNode.scrollTop = h2[index].offsetTop;
+            this.$refs.scroller.toScrollTop(-h2[index].offsetTop);
+        },
+        // 选择城市，并跳转到相应城市的正在热映电影页面
+        handleToCity(nm, id){
+            this.$store.commit('city/CITY_INFO', {nm, id});
+            window.localStorage.setItem('nowNm', nm);
+            window.localStorage.setItem('nowId', id);
+            this.$router.push('/movie/nowPlaying');
         }
     }    
 }

@@ -1,34 +1,39 @@
 <template>
     <div class="movie_body">
-        <ul>
-            <li v-for="item in comingList" :key="item.id">
-                <div class="pic_show"><img :src="item.img | setWH('128.180')"></div>
-                <div class="info_list">
-                    <h2>{{item.nm}}
-                        <img v-if="item.version" src="@/assets/2D-IMAX.png">
-                    </h2>
-                    <p><span class="person">{{item.wish}}</span> 人想看</p>
-                    <p>主演: {{item.star}}</p>
-                    <p>{{item.rt}}上映</p>
-                </div>
-                <div class="btn_pre">
-                    预售
-                </div>
-            </li>
-            <!-- 示例 -->
-            <!-- <li>
-                <div class="pic_show">
-                    <img src="" alt="">
-                </div>
-                <div class="info_list">
-                    <h2>毒液<img src="" alt=""></h2>
-                    <p><span class="person">12123</span>人想看</p>
-                    <p>主演：甄子丹</p>
-                    <p>2021-1-1上映</p>
-                </div>
-                <div class="btn_pre">预售</div>
-            </li> -->
-        </ul>
+        <Loading v-if="isLoading" />
+        <Scroller v-else :handleToScroll="handleToScroll" :handleToTouchEnd="handleToTouchEnd" ref="scroller">
+            <ul>
+                <li v-if="isEmpty" class="empty">暂无影院</li>
+                <li class="pullDown">{{ pullDownMsg }}</li>
+                <li v-for="item in comingList" :key="item.id">
+                    <div class="pic_show"  @tap="handleToDetail(item.id)"><img :src="item.img | setWH('128.180')"></div>
+                    <div class="info_list">
+                        <h2  @tap="handleToDetail(item.id)">{{item.nm}}
+                            <img v-if="item.version" src="@/assets/2D-IMAX.png">
+                        </h2>
+                        <p><span class="person">{{item.wish}}</span> 人想看</p>
+                        <p>主演: {{item.star}}</p>
+                        <p>{{item.rt}}上映</p>
+                    </div>
+                    <div class="btn_pre">
+                        预售
+                    </div>
+                </li>
+                <!-- 示例 -->
+                <!-- <li>
+                    <div class="pic_show">
+                        <img src="" alt="">
+                    </div>
+                    <div class="info_list">
+                        <h2>毒液<img src="" alt=""></h2>
+                        <p><span class="person">12123</span>人想看</p>
+                        <p>主演：甄子丹</p>
+                        <p>2021-1-1上映</p>
+                    </div>
+                    <div class="btn_pre">预售</div>
+                </li> -->
+            </ul>
+        </Scroller>
     </div>
 </template>
 
@@ -37,18 +42,67 @@ export default {
     name: 'ComingSoon',
     data(){
         return{
-            comingList: []
+            comingList: [],
+            pullDownMsg: '',
+            isLoading: true,
+            prevCityId: -1,
+            isEmpty: false
         }
     },
-    mounted(){
-        this.axios.get('/ajax/comingList?10&token=&limit=10').then((res)=>{
+    activated(){
+
+        var cityId = this.$store.state.city.id;
+        //若id相同，则未更改城市，无需重新发起请求
+        if(this.prevCityId === cityId){ return; }
+        // 重新发起请求，正在更新中
+        this.isLoading = true;
+        this.isEmpty = false;
+
+        this.axios.get('/ajax/comingList?cityId=' + cityId + '&token=&limit=').then((res)=>{
             if(res.statusText === "OK"){
                 this.comingList = res.data.coming;
-                console.log(this.comingList)
-                // this.prevCityId = cityId;
-                // this.isLoading = false;
+                console.log(this.comingList);
+                //更新完成
+                this.isLoading = false;
+                //保存此次城市id
+                this.prevCityId = cityId;
+                // 暂无影院
+				if(this.comingList == ''){
+					this.isEmpty = true;
+				}
+                //重新渲染better-scroll
+                this.$nextTick(() => {
+                    this.$refs.scroller.refreshBScroll();
+                })
             }
         })
+    },
+    methods: {
+        handleToDetail(movieId){
+            console.log(movieId)
+            this.$router.push('/movie/detail/2/' + movieId)
+        },
+        handleToScroll(pos){
+            // console.log('scroll');
+            if(pos.y > 30){
+                this.pullDownMsg = '正在更新中';
+            }
+        },
+        handleToTouchEnd(pos){
+            // console.log('touchend');
+            if(pos.y > 30){
+                this.axios.get('/ajax/movieOnInfoList?10').then((res) => {
+                    if(res.statusText === "OK"){
+                        this.pullDownMsg = '更新成功';
+                        setTimeout(() => {
+                            this.movieList = res.data.movieList;
+                            this.pullDownMsg = '';
+                        }, 1000)
+                    }
+                })
+            }
+        }
+
     }
 }
 </script>
@@ -91,4 +145,5 @@ export default {
 .movie_body .btn_mall , .movie_body .btn_pre{ width:47px; height:27px; line-height: 28px; text-align: center; background-color: #f03d37; color: #fff; border-radius: 4px; font-size: 12px; cursor: pointer;}
 .movie_body .btn_pre{ background-color: #3c9fe6;}
 .movie_body .pullDown{ margin: 0; padding: 0; border: none;}
+.movie_body li.empty{ border-bottom: none;}
 </style>

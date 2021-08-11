@@ -7,8 +7,19 @@ import axios from 'axios'
 Vue.prototype.axios = axios;
 
 Vue.filter('setWH', (url,args) => {
+  if(!url){
+    console.log('未完成渲染');
+    return url;
+  }
   return url.replace(/w\.h/, args);
 })
+
+import Scroller from './components/Scroller'
+Vue.component('Scroller', Scroller);
+
+import Loading from './components/Loading'
+Vue.component('Loading', Loading);
+
 Vue.config.productionTip = false
 
 new Vue({
