@@ -194,5 +194,8 @@ export default {
     display: flex; flex-direction:column; justify-content:center; 
     text-align: center; border-left:1px #e6e6e6 solid;
 }
+.city_body .city_index ul{
+    overflow: auto;
+}
 
 </style>
